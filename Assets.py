@@ -11,8 +11,10 @@ class Board:
     def __init__(self):
         self._grid = [[None for i in range(9)] for j in range(9)]
         self._grid[4][4] = (CASTLE, 0)
+        self._leftest = 4
+        self._highest = 4
 
-    def get_board(self):
+    def get_grid(self):
         return self._grid
 
     def get_coord(self, row, col):
@@ -48,6 +50,29 @@ class Board:
             if i % 2 == 1:
                 row += 1
             print(to_print)
+
+
+class Player:
+    def __init__(self, name):
+        self._name = name
+        self._dom_on_hold = None
+        self._board = Board()
+
+    def get_name(self):
+        return self._name
+
+    def get_dom_on_hold(self):
+        return self._dom_on_hold
+
+    def set_dom_on_hold(self, domino):
+        """
+        Set the domino this player claimed but has not placed yet
+        :param domino: a tuple of tuples representing a domino
+        """
+        self._dom_on_hold = domino
+
+    def get_board(self):
+        return self._board
 
 b = Board()
 b.print_board()
