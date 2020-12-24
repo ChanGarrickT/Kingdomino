@@ -1,0 +1,244 @@
+{
+  "dominoes": [
+    {
+      "number": 1,
+      "tile1": ["W", 0],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 2,
+      "tile1": ["W", 0],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 3,
+      "tile1": ["F", 0],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 4,
+      "tile1": ["F", 0],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 5,
+      "tile1": ["F", 0],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 6,
+      "tile1": ["F", 0],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 7,
+      "tile1": ["O", 0],
+      "tile2": ["O", 0]
+    },
+    {
+      "number": 8,
+      "tile1": ["O", 0],
+      "tile2": ["O", 0]
+    },
+    {
+      "number": 9,
+      "tile1": ["O", 0],
+      "tile2": ["O", 0]
+    },
+    {
+      "number": 10,
+      "tile1": ["G", 0],
+      "tile2": ["G", 0]
+    },
+    {
+      "number": 11,
+      "tile1": ["G", 0],
+      "tile2": ["G", 0]
+    },
+    {
+      "number": 12,
+      "tile1": ["S", 0],
+      "tile2": ["S", 0]
+    },
+    {
+      "number": 13,
+      "tile1": ["W", 0],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 14,
+      "tile1": ["W", 0],
+      "tile2": ["O", 0]
+    },
+    {
+      "number": 15,
+      "tile1": ["W", 0],
+      "tile2": ["G", 0]
+    },
+    {
+      "number": 16,
+      "tile1": ["W", 0],
+      "tile2": ["S", 0]
+    },
+    {
+      "number": 17,
+      "tile1": ["F", 0],
+      "tile2": ["O", 0]
+    },
+    {
+      "number": 18,
+      "tile1": ["F", 0],
+      "tile2": ["G", 0]
+    },
+    {
+      "number": 19,
+      "tile1": ["W", 1],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 20,
+      "tile1": ["W", 1],
+      "tile2": ["O", 0]
+    },
+    {
+      "number": 21,
+      "tile1": ["W", 1],
+      "tile2": ["G", 0]
+    },
+    {
+      "number": 22,
+      "tile1": ["W", 1],
+      "tile2": ["S", 0]
+    },
+    {
+      "number": 23,
+      "tile1": ["W", 1],
+      "tile2": ["M", 0]
+    },
+    {
+      "number": 24,
+      "tile1": ["F", 1],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 25,
+      "tile1": ["F", 1],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 26,
+      "tile1": ["F", 1],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 27,
+      "tile1": ["F", 1],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 28,
+      "tile1": ["F", 1],
+      "tile2": ["O", 0]
+    },
+    {
+      "number": 29,
+      "tile1": ["F", 1],
+      "tile2": ["G", 0]
+    },
+    {
+      "number": 30,
+      "tile1": ["O", 1],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 31,
+      "tile1": ["O", 1],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 32,
+      "tile1": ["O", 1],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 33,
+      "tile1": ["O", 1],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 34,
+      "tile1": ["O", 1],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 35,
+      "tile1": ["O", 1],
+      "tile2": ["F", 0]
+    },
+    {
+      "number": 36,
+      "tile1": ["W", 0],
+      "tile2": ["G", 1]
+    },
+    {
+      "number": 37,
+      "tile1": ["O", 0],
+      "tile2": ["G", 1]
+    },
+    {
+      "number": 38,
+      "tile1": ["W", 0],
+      "tile2": ["S", 1]
+    },
+    {
+      "number": 39,
+      "tile1": ["G", 0],
+      "tile2": ["S", 1]
+    },
+    {
+      "number": 40,
+      "tile1": ["M", 1],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 41,
+      "tile1": ["W", 0],
+      "tile2": ["G", 2]
+    },
+    {
+      "number": 42,
+      "tile1": ["O", 0],
+      "tile2": ["G", 2]
+    },
+    {
+      "number": 43,
+      "tile1": ["W", 0],
+      "tile2": ["S", 2]
+    },
+    {
+      "number": 44,
+      "tile1": ["G", 0],
+      "tile2": ["S", 2]
+    },
+    {
+      "number": 45,
+      "tile1": ["M", 2],
+      "tile2": ["W", 0]
+    },
+    {
+      "number": 46,
+      "tile1": ["S", 0],
+      "tile2": ["M", 2]
+    },
+    {
+      "number": 47,
+      "tile1": ["S", 0],
+      "tile2": ["M", 2]
+    },
+    {
+      "number": 48,
+      "tile1": ["W", 0],
+      "tile2": ["M", 3]
+    }
+  ]
+}
