@@ -18,7 +18,38 @@ class Board:
         return self._grid
 
     def get_coord(self, row, col):
-        return self._grid[row][col]
+        if 0 <= row < len(self._grid) and 0 <= col < len(self._grid[0]):
+            return self._grid[row][col]
+        else:
+            return None
+
+    def check_match(self, row, col, a_terrain):
+        """
+        Checks if the terrain at a coordinate matches the parameter terrain
+        :param row: the row number to check
+        :param col: the column number to check
+        :param a_terrain: a character representing the terrain
+        :return: True if the terrain matches, False otherwise
+        """
+        terrain = self.get_coord(row, col)
+        if terrain is None:
+            return False
+        else:
+            return terrain[0] == a_terrain
+
+    def check_match_castle(self, row, col, a_terrain):
+        """
+        Checks if the terrain at a coordinate matches the parameter terrain or is the castle
+        :param row: the row number to check
+        :param col: the column number to check
+        :param a_terrain: a character representing the terrain
+        :return: True if the terrain matches or is castle, False otherwise
+        """
+        terrain = self.get_coord(row, col)
+        if terrain is None:
+            return False
+        else:
+            return terrain[0] == a_terrain or terrain[0] == CASTLE
 
     def set_coord(self, row, col, obj):
         """

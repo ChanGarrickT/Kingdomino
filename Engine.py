@@ -1,7 +1,6 @@
 from Assets import Player
 import json
 import random
-from copy import deepcopy
 
 P1 = 0
 P2 = 1
@@ -12,7 +11,7 @@ PLACE = 1
 
 
 class Engine:
-    def __init__(self, players):
+    def __init__(self, players, debug_mode=False):
         """
         Initializes the game
         :param players: A list of player names
@@ -33,7 +32,8 @@ class Engine:
                 self._turn_order = []
                 for p in players:
                     self._turn_order.append(self._players[p])
-                random.shuffle(self._turn_order)
+                if not debug_mode:
+                    random.shuffle(self._turn_order)
                 self._turn = 0
                 self._next_order = [None for i in range(len(players))]
                 try:
@@ -149,14 +149,47 @@ class Engine:
             return
         try:
             player = self._players[name]
+            if not validate_neighbor(player.get_board(), player.get_dom_on_hold(), coord1, coord2):
+                print('No matching adjacent tile')
+            else:
+                pass
         except KeyError:
             print("Name not found")
 
-    def validate_placement(self, name, coord1, coord2):
-        dup_board = deepcopy(self._players[name].get_board())
-        domino = self._players[name].get_dom_on_hold()
-        tile1 = domino[0]
-        tile2 = domino[1]
+
+def validate_overlap(board, coord1, coord2):
+    pass
+
+
+def validate_neighbor(board, domino, coord1, coord2):
+    """
+    Checks whether a new domino would be adjacent to a matching terrain
+    :param board: the board to check
+    :param domino: a tuple of tuples representing the domino's tiles
+    :param coord1: a tuple (row, col) representing where to place tile1 of the domino
+    :param coord2: a tuple (row, col) representing where to place tile2 of the domino
+    :return: True if the domino can be placed at the given coordinate, False if not
+    """
+    x1, y1, x2, y2 = coord1[0], coord1[1], coord2[0], coord2[1]
+    # Check if either desired destination is already occupied
+    if board.get_coord(x1, y1) is not None or board.get_coord(x2, y2):
+        return False
+    # Check if tiles adjacent to the destination are compatible
+    terrain1 = domino[0][0]
+    terrain2 = domino[1][0]
+    validity1 = (board.check_match_castle(x1 - 1, y1, terrain1) or
+                 board.check_match_castle(x1 + 1, y1, terrain1) or
+                 board.check_match_castle(x1, y1 - 1, terrain1) or
+                 board.check_match_castle(x1, y1 + 1, terrain1))
+    validity2 = (board.check_match_castle(x2 - 1, y2, terrain2) or
+                 board.check_match_castle(x2 + 1, y2, terrain2) or
+                 board.check_match_castle(x2, y2 - 1, terrain2) or
+                 board.check_match_castle(x2, y2 + 1, terrain2))
+    return validity1 or validity2
+
+
+def validate_size(board, coord1, coord2):
+    pass
 
 
 def validate_coord(coord1, coord2):
@@ -180,7 +213,7 @@ def score_board(board):
     pass
 
 
-e = Engine(['blue', 'pink'])
+e = Engine(['blue', 'pink'], True)
 # game loop
 e.deal_dominoes()
 e.claim_domino('blue', 0)
