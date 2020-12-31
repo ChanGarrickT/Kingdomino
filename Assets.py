@@ -23,7 +23,7 @@ class Board:
 
     def get_max_size(self):
         """Returns the maximum width of terrain-containing tiles"""
-        return (len(self._grid) / 2) + 1
+        return int(len(self._grid) / 2) + 1
 
     def get_coord(self, row, col):
         """

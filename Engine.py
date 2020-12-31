@@ -1,7 +1,6 @@
 from Assets import Player
 import json
 import random
-from copy import deepcopy
 
 P1 = 0
 P2 = 1
@@ -266,7 +265,6 @@ def validate_size(board, coord1, coord2, max_size):
     :param max_size: the maximum number of tiles wide the board can be
     :return: a list of board bounds to update if the resulting board is within bounds, False otherwise
     """
-    dup_board = deepcopy(board)
     x1, y1, x2, y2 = coord1[0], coord1[1], coord2[0], coord2[1]
     topmost = min(board.get_topmost(), x1, x2)
     bottommost = max(board.get_bottommost(), x1, x2)
@@ -279,7 +277,62 @@ def validate_size(board, coord1, coord2, max_size):
 
 
 def score_board(board):
-    pass
+    """
+    Calculates and returns the score of the given board
+    :param board: the board with which to calculate the score
+    :return: the score
+    """
+    # Store all tiles to check in set
+    unexplored = set()
+    size = board.get_max_size()
+    for i in range(size):
+        for j in range(size):
+            unexplored.add((i + board.get_topmost(), j + board.get_leftmost()))
+
+    score = 0
+    # While there are unexplored coordinates, find contiguous sections of terrain
+    # Score per section is the product of its size and number of crowns
+    while len(unexplored) > 0:
+        section = _find_contiguous(board, unexplored.pop(), unexplored)
+        unexplored -= section
+        crowns = 0
+        for c in section:
+            crowns += board.get_coord(c[0], c[1])[1]
+        score += (len(section) * crowns)
+    return score
+
+
+def _find_contiguous(board, coord, unexplored):
+    row = coord[0]
+    col = coord[1]
+    if board.get_coord(row, col) is None:
+        return set()
+    # Make local copy of unexplored
+    unexplored_copy = set(unexplored)
+    # Add coord to contiguous
+    contiguous = set()
+    contiguous.add(coord)
+    # For each unexplored neighbor with a matching terrain:
+    #   Remove that neighbor from unexplored
+    #   Recurse with each of those neighbors
+    if board.get_coord(row - 1, col) is not None:
+        if (row - 1, col) in unexplored_copy and board.get_coord(row, col)[0] == board.get_coord(row - 1, col)[0]:
+            contiguous.update(_find_contiguous(board, (row - 1, col), unexplored_copy))
+            unexplored_copy -= contiguous
+    if board.get_coord(row + 1, col) is not None:
+        if (row + 1, col) in unexplored_copy and board.get_coord(row, col)[0] == board.get_coord(row + 1, col)[0]:
+            contiguous.update(_find_contiguous(board, (row + 1, col), unexplored_copy))
+            unexplored_copy -= contiguous
+    if board.get_coord(row, col - 1) is not None:
+        if (row, col - 1) in unexplored_copy and board.get_coord(row, col)[0] == board.get_coord(row, col - 1)[0]:
+            contiguous.update(_find_contiguous(board, (row, col - 1), unexplored_copy))
+            unexplored_copy -= contiguous
+    if board.get_coord(row, col + 1) is not None:
+        if (row, col + 1) in unexplored_copy and board.get_coord(row, col)[0] == board.get_coord(row, col + 1)[0]:
+            contiguous.update(_find_contiguous(board, (row, col + 1), unexplored_copy))
+            unexplored_copy -= contiguous
+
+    return contiguous
 
 
 e = Engine(['blue', 'pink'], True)
@@ -289,5 +342,8 @@ e.claim_domino('blue', 0)
 e.claim_domino('pink', 1)
 e.place_domino('blue', (3,4), (3,5))
 e.get_player('blue').get_board().print_board()
-e.place_domino('pink', (4,6), (4,7))
+print(score_board(e.get_player('blue').get_board()))
+e.place_domino('pink', (4,5), (4,6))
 e.get_player('pink').get_board().print_board()
+print(score_board(e.get_player('pink').get_board()))
+
