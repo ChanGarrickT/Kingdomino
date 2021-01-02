@@ -1,11 +1,7 @@
-from Assets import Player
+from Assets import Board, Player
 import json
 import random
 
-P1 = 0
-P2 = 1
-P3 = 2
-P4 = 3
 CLAIM = 0
 PLACE = 1
 
@@ -42,11 +38,14 @@ class Engine:
                         for d in data['dominoes']:
                             self._deck.append((d['number'], tuple(d['tile1']), tuple(d['tile2'])))
                     random.shuffle(self._deck)
+                    self._deck = self._deck[:12*len(self._players)]
                 except FileNotFoundError:
-                    print ('Domino data not found')
+                    print('Domino data not found')
+                print('Game successfully initiated')
                 self._deal = []
+                print('Deal: ' + str(self.deal_dominoes()))
             else:
-                print ('Invalid number of players')
+                print('Invalid number of players')
         else:
             print('Player names not unique')
 
@@ -63,6 +62,23 @@ class Engine:
             print('Invalid game setup')
             return
         return self._turn_order[self._turn]
+
+    def set_turn(self):
+        """Sets the turn and phase of the game"""
+        self._turn += 1
+        if self._turn == len(self._players):
+            self._turn = 0
+            if self._phase == CLAIM:
+                self._phase = PLACE
+                print('Moving to Placement phase')
+            elif len(self._deck) > 0 and self._phase == PLACE:
+                self._phase = CLAIM
+                print('Moving to Claim phase')
+                print('Deal: ' + str(self.deal_dominoes()))
+            else:
+                print('Game over')
+        if self._phase == CLAIM:
+            print(self.get_turn().get_name() + '\'s turn to pick')
 
     def get_player(self, name):
         """
@@ -126,13 +142,9 @@ class Engine:
                 return
             player.set_dom_on_hold(self._deal[position])
             self._next_order[position] = player
-            self._turn += 1
             print(name + ' claimed domino ' + str(self._deal[position]) + ' from slot ' + str(position + 1))
             # Once all tiles are claimed, move to placement phase
-            if self._turn >= len(self._players):
-                self._turn = 0
-                self._phase = PLACE
-                print('Moving to Placement phase')
+            self.set_turn()
         except KeyError:
             print('Name not found')
 
@@ -177,11 +189,7 @@ class Engine:
             print(name + ' placed ' + str(player.get_dom_on_hold()[0]) + ' at ' + str(coord1) +
                             ' and ' + str(player.get_dom_on_hold()[1]) + ' at ' + str(coord2))
             player.set_dom_on_hold(None)
-            self._turn += 1
-            if self._turn >= len(self._players):
-                self._turn = 0
-                self._phase = CLAIM
-                print('Moving to Claim phase')
+            self.set_turn()
         except KeyError:
             print("Name not found")
 
@@ -293,20 +301,29 @@ def score_board(board):
     # While there are unexplored coordinates, find contiguous sections of terrain
     # Score per section is the product of its size and number of crowns
     while len(unexplored) > 0:
-        section = _find_contiguous(board, unexplored.pop(), unexplored)
+        coord = unexplored.pop()
+        section = _find_contiguous(board, coord, unexplored)
         unexplored -= section
         crowns = 0
-        for c in section:
-            crowns += board.get_coord(c[0], c[1])[1]
+        for tile in section:
+            crowns += board.get_coord(tile[0], tile[1])[1]
         score += (len(section) * crowns)
     return score
 
 
 def _find_contiguous(board, coord, unexplored):
+    """
+    Helper method for score_board to obtain contiguous terrain data
+    :param board: the board to search
+    :param coord: a tuple representing the coordinate to expand from
+    :param unexplored: the set of unexplored coordinates
+    :return: the set of contiguous-terrain coordinates
+    """
     row = coord[0]
     col = coord[1]
     if board.get_coord(row, col) is None:
         return set()
+    terrain = board.get_coord(row, col)[0]
     # Make local copy of unexplored
     unexplored_copy = set(unexplored)
     # Add coord to contiguous
@@ -316,19 +333,23 @@ def _find_contiguous(board, coord, unexplored):
     #   Remove that neighbor from unexplored
     #   Recurse with each of those neighbors
     if board.get_coord(row - 1, col) is not None:
-        if (row - 1, col) in unexplored_copy and board.get_coord(row, col)[0] == board.get_coord(row - 1, col)[0]:
+        if (row - 1, col) in unexplored_copy and board.check_match(row - 1, col, terrain):
+            unexplored_copy.remove((row - 1, col))
             contiguous.update(_find_contiguous(board, (row - 1, col), unexplored_copy))
             unexplored_copy -= contiguous
     if board.get_coord(row + 1, col) is not None:
-        if (row + 1, col) in unexplored_copy and board.get_coord(row, col)[0] == board.get_coord(row + 1, col)[0]:
+        if (row + 1, col) in unexplored_copy and board.check_match(row + 1, col, terrain):
+            unexplored_copy.remove((row + 1, col))
             contiguous.update(_find_contiguous(board, (row + 1, col), unexplored_copy))
             unexplored_copy -= contiguous
     if board.get_coord(row, col - 1) is not None:
-        if (row, col - 1) in unexplored_copy and board.get_coord(row, col)[0] == board.get_coord(row, col - 1)[0]:
+        if (row, col - 1) in unexplored_copy and board.check_match(row, col - 1, terrain):
+            unexplored_copy.remove((row, col - 1))
             contiguous.update(_find_contiguous(board, (row, col - 1), unexplored_copy))
             unexplored_copy -= contiguous
     if board.get_coord(row, col + 1) is not None:
-        if (row, col + 1) in unexplored_copy and board.get_coord(row, col)[0] == board.get_coord(row, col + 1)[0]:
+        if (row, col + 1) in unexplored_copy and board.check_match(row, col + 1, terrain):
+            unexplored_copy.remove((row, col + 1))
             contiguous.update(_find_contiguous(board, (row, col + 1), unexplored_copy))
             unexplored_copy -= contiguous
 
@@ -346,4 +367,8 @@ print(score_board(e.get_player('blue').get_board()))
 e.place_domino('pink', (4,5), (4,6))
 e.get_player('pink').get_board().print_board()
 print(score_board(e.get_player('pink').get_board()))
+
+# b = Board(preset='exBoard1.csv')
+# b.print_board()
+# print(score_board(b))
 

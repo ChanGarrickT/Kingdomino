@@ -1,3 +1,5 @@
+import csv
+
 CASTLE = 'C'
 WHEAT = 'W'
 GRASS = 'G'
@@ -8,14 +10,36 @@ MINE = 'M'
 
 
 class Board:
-    def __init__(self):
-        """Initializes the Board"""
-        self._grid = [[None for i in range(9)] for j in range(9)]
-        self._grid[4][4] = (CASTLE, 0)
-        self._topmost = 4
-        self._bottommost = 4
-        self._leftmost = 4
-        self._rightmost = 4
+    def __init__(self, small=True, preset=None):
+        """
+        Initializes the Board
+        :param small: True for 2-4-player 5x5, False for 2-player 7x7
+        :param preset: File name of csv containing a pre-filled board
+        """
+        size = 9 if small else 11
+        mid = 4 if small else 5
+        self._grid = [[None for i in range(size)] for j in range(size)]
+        self._grid[mid][mid] = (CASTLE, 0)
+        self._topmost = mid
+        self._bottommost = mid
+        self._leftmost = mid
+        self._rightmost = mid
+        if preset is not None:
+            try:
+                with open(preset, 'r') as csv_file:
+                    reader = csv.reader(csv_file)
+                    i = 0
+                    for row in reader:
+                        for j in range(len(row)):
+                            if row[j] == 'XX':
+                                self._grid[i][j] = None
+                            else:
+                                self._grid[i][j] = (row[j][0], int(row[j][1]))
+                        i += 1
+                self._topmost = 0
+                self._leftmost = 0
+            except FileNotFoundError:
+                print('Board preset not found')
 
     def get_grid(self):
         """Returns the 2D list representation of the Board"""
