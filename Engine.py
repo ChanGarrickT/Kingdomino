@@ -68,6 +68,14 @@ class Engine:
     def set_turn(self):
         """Sets the turn and phase of the game"""
         self._turn += 1
+        if self._turn == len(self._players) - 1 and self._phase == CLAIM:
+            empty = 0
+            for i in range(len(self._next_order)):
+                if self._next_order[i] is None:
+                    empty = i
+            self.claim_domino(self._turn_order[self._turn].get_name(), empty)
+            self.print_deal()
+            return
         if self._turn == len(self._players):
             self._turn = 0
             if self._phase == CLAIM:
@@ -87,6 +95,7 @@ class Engine:
                         player = self._players[p]
                         print(player.get_name() + ': ' + str(score_board(player.get_board())) + ' points')
         if self._phase == CLAIM:
+            self.print_deal()
             print(self.get_turn().get_name() + '\'s turn to pick')
 
     def get_player(self, name):
@@ -178,9 +187,7 @@ class Engine:
             player.set_dom_on_hold(self._deal[position])
             self._next_order[position] = player
             print(name + ' claimed domino ' + str(self._deal[position]) + ' from slot ' + str(position + 1))
-            # Once all tiles are claimed, move to placement phase
             self.set_turn()
-            self.print_deal()
         except KeyError:
             print('Name not found')
         except IndexError:
@@ -214,6 +221,8 @@ class Engine:
                 print('No matching adjacent tile')
                 return
             max_size = player.get_board().get_max_size()
+            # Check if placement keeps board no larger than 5x5 in small mode, 7x7 in large mode
+            # Update bounds if the check passes
             size_updates = validate_size(player.get_board(), coord1, coord2, max_size)
             if not size_updates:
                 print('Terrain grid cannot exceed ' + str(max_size) + 'x' + str(max_size))
@@ -395,10 +404,11 @@ def _find_contiguous(board, coord, unexplored):
     return contiguous
 
 
-# e = Engine(['blue', 'pink'])
-# game loop
-# e.claim_domino('blue', 0)
-# e.claim_domino('pink', 1)
+# e = Engine(['blue', 'pink', 'green', 'yellow'], debug_mode=True)
+# # game loop
+# e.claim_domino('blue', 2)
+# e.claim_domino('pink', 3)
+# e.claim_domino('green', 1)
 # e.place_domino('blue', (3,4), (3,5))
 # e.get_player('blue').get_board().print_board()
 # print(score_board(e.get_player('blue').get_board()))
