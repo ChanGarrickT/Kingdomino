@@ -88,7 +88,6 @@ class Engine:
                     self.deal_dominoes()
                     self._phase = CLAIM
                     print('\nMoving to Claim phase')
-                    self.print_deal()
                 else:
                     print('\nGame Over')
                     for p in self._players:
@@ -402,21 +401,3 @@ def _find_contiguous(board, coord, unexplored):
             unexplored_copy -= contiguous
 
     return contiguous
-
-
-# e = Engine(['blue', 'pink', 'green', 'yellow'], debug_mode=True)
-# # game loop
-# e.claim_domino('blue', 2)
-# e.claim_domino('pink', 3)
-# e.claim_domino('green', 1)
-# e.place_domino('blue', (3,4), (3,5))
-# e.get_player('blue').get_board().print_board()
-# print(score_board(e.get_player('blue').get_board()))
-# e.place_domino('pink', (4,5), (4,6))
-# e.get_player('pink').get_board().print_board()
-# print(score_board(e.get_player('pink').get_board()))
-
-# b = Board(preset='exBoard1.csv')
-# b.print_board()
-# print(score_board(b))
-
