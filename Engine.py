@@ -41,9 +41,11 @@ class Engine:
                     self._deck = self._deck[:12*len(self._players)]
                 except FileNotFoundError:
                     print('Domino data not found')
-                print('Game successfully initiated')
+                print('Game successfully initiated\n')
+                print(self.get_turn().get_name() + '\'s turn to pick')
                 self._deal = []
-                print('Deal: ' + str(self.deal_dominoes()))
+                self.deal_dominoes()
+                self.print_deal()
             else:
                 print('Invalid number of players')
         else:
@@ -70,13 +72,20 @@ class Engine:
             self._turn = 0
             if self._phase == CLAIM:
                 self._phase = PLACE
-                print('Moving to Placement phase')
-            elif len(self._deck) > 0 and self._phase == PLACE:
-                self._phase = CLAIM
-                print('Moving to Claim phase')
-                print('Deal: ' + str(self.deal_dominoes()))
+                self._turn_order = self._next_order
+                self._next_order = [None for i in range(len(self._players))]
+                print('\nMoving to Placement phase')
             else:
-                print('Game over')
+                if len(self._deck) > 0:
+                    self.deal_dominoes()
+                    self._phase = CLAIM
+                    print('\nMoving to Claim phase')
+                    self.print_deal()
+                else:
+                    print('\nGame Over')
+                    for p in self._players:
+                        player = self._players[p]
+                        print(player.get_name() + ': ' + str(score_board(player.get_board())) + ' points')
         if self._phase == CLAIM:
             print(self.get_turn().get_name() + '\'s turn to pick')
 
@@ -109,16 +118,42 @@ class Engine:
         if not self._valid_setup:
             print('Invalid game setup')
             return
-        deal = []
+        self._deal = []
         if len(self._deck) >= len(self._players):
-            deal = self._deck[-len(self._players):]
-            self._deck = self._deck[:-len(self._players)]
-            deal = sorted(deal, key=lambda dom: dom[0])
-            for d in deal:
-                d = d[1:]
-                self._deal.append(d)
-                print(self._deal)
-        return deal
+            self._deal = self._deck[:len(self._players)]
+            self._deck = self._deck[len(self._players):]
+            self._deal = sorted(self._deal, key=lambda dom: dom[0])
+            for i in range(len(self._deal)):
+                d = self._deal[i][1:]
+                self._deal[i] = d
+
+    def print_deal(self):
+        """Prints the deal of dominoes along with who has claimed them"""
+        print('Deal:')
+        for i in range(len(self._players)):
+            domino = self._deal[i]
+            name = ''
+            for p in self._players:
+                if self._players[p].get_dom_on_hold() == domino:
+                    name = self._players[p].get_name()
+            print(str(domino) + ' ' + name)
+
+    def print_board(self, name=None):
+        """
+        Prints a player's board, or all boards if no name given
+        :param name: the name of the player whose board to print
+        """
+        if name is None:
+            for p in self._players:
+                print(self._players[p].get_name())
+                self._players[p].get_board().print_board()
+        else:
+            try:
+                player = self._players[name]
+                print(player.get_name())
+                player.get_board().print_board()
+            except KeyError:
+                print('Name not found')
 
     def claim_domino(self, name, position):
         """
@@ -132,21 +167,24 @@ class Engine:
         if self._phase != CLAIM:
             print('Not currently claim phase')
             return
-        if self._next_order[position] is not None:
-            print('Domino already claimed')
-            return
         try:
             player = self._players[name]
             if self._turn_order[self._turn] is not player:
                 print('Not ' + name + '\'s turn')
+                return
+            if self._next_order[position] is not None:
+                print('Domino already claimed')
                 return
             player.set_dom_on_hold(self._deal[position])
             self._next_order[position] = player
             print(name + ' claimed domino ' + str(self._deal[position]) + ' from slot ' + str(position + 1))
             # Once all tiles are claimed, move to placement phase
             self.set_turn()
+            self.print_deal()
         except KeyError:
             print('Name not found')
+        except IndexError:
+            print('Invalid index, please use 0 - ' + str(len(self._players) - 1))
 
     def place_domino(self, name, coord1, coord2):
         """
@@ -178,7 +216,7 @@ class Engine:
             max_size = player.get_board().get_max_size()
             size_updates = validate_size(player.get_board(), coord1, coord2, max_size)
             if not size_updates:
-                print('Terrain grid cannot exceed ' + max_size + 'x' + max_size)
+                print('Terrain grid cannot exceed ' + str(max_size) + 'x' + str(max_size))
                 return
             player.get_board().set_topmost(size_updates[0])
             player.get_board().set_bottommost(size_updates[1])
@@ -203,6 +241,7 @@ class Engine:
         try:
             player = self._players[name]
             player.set_dom_on_hold(None)
+            print(name + ' discarded their domino')
             self._turn += 1
             if self._turn >= len(self._players):
                 self._turn = 0
@@ -278,7 +317,7 @@ def validate_size(board, coord1, coord2, max_size):
     bottommost = max(board.get_bottommost(), x1, x2)
     leftmost = min(board.get_leftmost(), y1, y2)
     rightmost = max(board.get_rightmost(), y1, y2)
-    if bottommost - topmost > max_size or rightmost - leftmost > max_size:
+    if bottommost - topmost + 1 > max_size or rightmost - leftmost + 1 > max_size:
         return False
     else:
         return [topmost, bottommost, leftmost, rightmost]
@@ -356,17 +395,16 @@ def _find_contiguous(board, coord, unexplored):
     return contiguous
 
 
-e = Engine(['blue', 'pink'], True)
+# e = Engine(['blue', 'pink'])
 # game loop
-e.deal_dominoes()
-e.claim_domino('blue', 0)
-e.claim_domino('pink', 1)
-e.place_domino('blue', (3,4), (3,5))
-e.get_player('blue').get_board().print_board()
-print(score_board(e.get_player('blue').get_board()))
-e.place_domino('pink', (4,5), (4,6))
-e.get_player('pink').get_board().print_board()
-print(score_board(e.get_player('pink').get_board()))
+# e.claim_domino('blue', 0)
+# e.claim_domino('pink', 1)
+# e.place_domino('blue', (3,4), (3,5))
+# e.get_player('blue').get_board().print_board()
+# print(score_board(e.get_player('blue').get_board()))
+# e.place_domino('pink', (4,5), (4,6))
+# e.get_player('pink').get_board().print_board()
+# print(score_board(e.get_player('pink').get_board()))
 
 # b = Board(preset='exBoard1.csv')
 # b.print_board()
