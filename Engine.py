@@ -21,10 +21,8 @@ class Engine:
                 self._valid_setup = True
                 self._game_over = False
                 self._players = {}
-                player_id = 0
                 for p in players:
-                    self._players[p] = Player(p, player_id)
-                    player_id += 1
+                    self._players[p] = Player(p)
                 self._phase = CLAIM
                 self._deck = []
                 self._turn_order = []
@@ -115,6 +113,13 @@ class Engine:
             return self._players[name]
         except KeyError:
             print('Name not found')
+
+    def get_players(self):
+        """Returns a list of player names"""
+        names = []
+        for p in self._players:
+            names.append(p)
+        return names
 
     def get_player_count(self):
         """Returns the number of players in the game"""

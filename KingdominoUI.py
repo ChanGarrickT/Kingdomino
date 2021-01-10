@@ -5,7 +5,7 @@ from Assets import Board
 
 TILE_SIZE = 50
 CROWN_SIZE = 15
-BOARD_OFFSET = [(60,60), (1410,60), (60,570), (1410,570)]
+BOARD_OFFSET = [(60, 60), (1410, 60), (60, 570), (1410, 570)]
 TERRAINS = {'W': 'wheat.png', 'F': 'forest.png', 'O': 'ocean.png', 'G': 'grass.png', 'S': 'swamp.png', 'M': 'mine.png'}
 CASTLES = ['castle_blue.png', 'castle_pink.png', 'castle_yellow.png', 'castle_green.png']
 
@@ -17,7 +17,7 @@ def draw(board, surface, player_number):
             tile_img = ''
             if tile is not None:
                 if tile[0] == 'C':
-                    tile_img = pygame.image.load('images/' + CASTLES[0])
+                    tile_img = pygame.image.load('images/' + CASTLES[player_number])
                 else:
                     tile_img = pygame.image.load('images/' + TERRAINS[tile[0]])
                 x = BOARD_OFFSET[player_number][0] + col * TILE_SIZE
