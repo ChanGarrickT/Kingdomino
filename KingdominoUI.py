@@ -1,26 +1,27 @@
 import pygame
 from pygame.locals import *
+from Assets import Board
+
 
 TILE_SIZE = 50
+CROWN_SIZE = 15
+BOARD_OFFSET = [(60,60), (1410,60), (60,570), (1410,570)]
+TERRAINS = {'W': 'wheat.png', 'F': 'forest.png', 'O': 'ocean.png', 'G': 'grass.png', 'S': 'swamp.png', 'M': 'mine.png'}
+CASTLES = ['castle_blue.png', 'castle_pink.png', 'castle_yellow.png', 'castle_green.png']
 
-pygame.init()
 
-screen = pygame.display.set_mode((1920,1080))
+def draw(board, surface, player_number):
+    for row in range(len(board.get_grid())):
+        for col in range(len(board.get_grid()[0])):
+            tile = board.get_coord(row, col)
+            tile_img = ''
+            if tile is not None:
+                if tile[0] == 'C':
+                    tile_img = pygame.image.load('images/' + CASTLES[0])
+                else:
+                    tile_img = pygame.image.load('images/' + TERRAINS[tile[0]])
+                x = BOARD_OFFSET[player_number][0] + col * TILE_SIZE
+                y = BOARD_OFFSET[player_number][1] + row * TILE_SIZE
+                surface.blit(tile_img, (x, y))
 
-gameOn = True
 
-while gameOn:
-    for event in pygame.event.get():
-        if event.type == KEYDOWN:
-            if event.key == K_BACKSPACE:
-                gameOn = False
-        elif event.type == QUIT:
-            gameOn = False
-
-    # Draw surface to location
-    screen.blit(sq1.surf, (40,40))
-    screen.blit(sq2.surf, (40,530))
-    screen.blit(sq3.surf, (730,40))
-    screen.blit(sq4.surf, (730, 530))
-
-    pygame.display.flip()

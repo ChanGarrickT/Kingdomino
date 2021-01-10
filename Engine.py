@@ -21,8 +21,10 @@ class Engine:
                 self._valid_setup = True
                 self._game_over = False
                 self._players = {}
+                player_id = 0
                 for p in players:
-                    self._players[p] = Player(p)
+                    self._players[p] = Player(p, player_id)
+                    player_id += 1
                 self._phase = CLAIM
                 self._deck = []
                 self._turn_order = []
@@ -50,6 +52,9 @@ class Engine:
                 print('Invalid number of players')
         else:
             print('Player names not unique')
+
+    def get_valid_setup(self):
+        return self._valid_setup
 
     def get_game_over(self):
         """Returns whether the game is over"""
