@@ -166,15 +166,23 @@ class Board:
 
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, name, player_id):
+        """
+        Initialize the Player
+        :param name: player's name
+        :param player_id: a number assigned to the player for indexing
+        """
         self._name = name
         self._dom_on_hold = None
         self._board = Board()
+        self._player_id = player_id
 
     def get_name(self):
+        """Returns the name of the player"""
         return self._name
 
     def get_dom_on_hold(self):
+        """Returns the domino on hold by this player, represented by two tuples"""
         return self._dom_on_hold
 
     def set_dom_on_hold(self, domino):
@@ -185,4 +193,9 @@ class Player:
         self._dom_on_hold = domino
 
     def get_board(self):
+        """Returns this player's Board"""
         return self._board
+
+    def get_player_id(self):
+        """Returns the player id"""
+        return self._player_id

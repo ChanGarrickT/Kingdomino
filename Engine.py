@@ -21,8 +21,10 @@ class Engine:
                 self._valid_setup = True
                 self._game_over = False
                 self._players = {}
+                player_id = 0
                 for p in players:
-                    self._players[p] = Player(p)
+                    self._players[p] = Player(p, player_id)
+                    player_id += 1
                 self._phase = CLAIM
                 self._deck = []
                 self._turn_order = []
@@ -71,6 +73,7 @@ class Engine:
     def set_turn(self):
         """Sets the turn and phase of the game"""
         self._turn += 1
+        # Automatically claim the last domino for the last player
         if self._turn == len(self._players) - 1 and self._phase == CLAIM:
             empty = 0
             for i in range(len(self._next_order)):
@@ -79,17 +82,18 @@ class Engine:
             self.claim_domino(self._turn_order[self._turn].get_name(), empty)
             self.print_deal()
             return
+        # Increment the turn and/or change phases
         if self._turn == len(self._players):
             self._turn = 0
             if self._phase == CLAIM:
                 self._phase = PLACE
                 self._turn_order = self._next_order
-                self._next_order = [None for i in range(len(self._players))]
                 print('\nMoving to Placement phase')
             else:
                 if len(self._deck) > 0:
                     self.deal_dominoes()
                     self._phase = CLAIM
+                    self._next_order = [None for i in range(len(self._players))]
                     print('\nMoving to Claim phase')
                 else:
                     print('\nGame Over')
@@ -128,6 +132,14 @@ class Engine:
             return
         return len(self._players)
 
+    def get_next_order(self):
+        """Returns an ordered list representing next turn's claim order"""
+        return self._next_order
+
+    def get_deal(self):
+        """Returns the current deal of dominoes"""
+        return self._deal
+
     def deal_dominoes(self):
         """
         Deals a number of dominoes equal to the number of players
@@ -151,9 +163,8 @@ class Engine:
         for i in range(len(self._players)):
             domino = self._deal[i]
             name = ''
-            for p in self._players:
-                if self._players[p].get_dom_on_hold() == domino:
-                    name = self._players[p].get_name()
+            if self._next_order[i] is not None:
+                name = self._next_order[i].get_name()
             print(str(domino) + ' ' + name)
 
     def print_board(self, name=None):
