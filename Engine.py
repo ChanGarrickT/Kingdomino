@@ -132,9 +132,29 @@ class Engine:
             return
         return len(self._players)
 
+    def get_current_player(self):
+        """Returns the Player currently allowed to claim"""
+        if not self._valid_setup:
+            print('Invalid game setup')
+            return
+        if self._phase != CLAIM:
+            print('Not currently claim phase')
+            return
+        return self._turn_order[self._turn]
+
     def get_next_order(self):
         """Returns an ordered list representing next turn's claim order"""
+        if not self._valid_setup:
+            print('Invalid game setup')
+            return
         return self._next_order
+
+    def get_phase(self):
+        """Returns the current phase of the game"""
+        if not self._valid_setup:
+            print('Invalid game setup')
+            return
+        return self._phase
 
     def get_deal(self):
         """Returns the current deal of dominoes"""
