@@ -22,27 +22,31 @@ else:
 
     grid_length = len(e.get_player(e.get_players()[0]).get_board().get_grid())
 
-    background = pygame.image.load('images/background.png')
-    screen.blit(background, (0, 0))
+    place_queue = [None for _ in range(len(e.get_players()))]
 
     run = True
     while run:
+        background = pygame.image.load('images/background.png')
+        screen.blit(background, (0, 0))
+
         player_index = 0
         board_rects = []
         deal_rects = []
         for p in e.get_players():
-            # kui.draw_board(screen, e.get_player(p).get_board(), player_index)
             grid_surf = pygame.Surface((TILE_SIZE*grid_length, TILE_SIZE*grid_length))
             grid_surf.set_alpha(255)
-            draw_board(grid_surf, presets[player_index], player_index)
+            # draw_board(grid_surf, presets[player_index], player_index)
+            draw_board(grid_surf, e.get_player(p).get_board(), player_index)
             board_rects.append(screen.blit(grid_surf, BOARD_OFFSET[player_index]))
             player_index += 1
-        dom_number = 0
-        for d in e.get_deal():
+        for i in range(len(e.get_deal())):
             deal_surf = pygame.Surface((TILE_SIZE*4, TILE_SIZE*2))
-            draw_domino(deal_surf, d)
-            deal_rects.append(screen.blit(deal_surf, (DEAL_OFFSET[0], DEAL_OFFSET[1] + dom_number*200)))
-            dom_number += 1
+            draw_domino(deal_surf, e.get_deal()[i])
+            deal_rects.append(screen.blit(deal_surf, (DEAL_OFFSET[0], DEAL_OFFSET[1] + i * 200)))
+            if e.get_next_order()[i] is not None:
+                font = pygame.font.Font(None, 36)
+                text = font.render(e.get_next_order()[i].get_name(), True, (0, 0, 0))
+                screen.blit(text, (DEAL_OFFSET[0] + 300, DEAL_OFFSET[1] + i * 200))
         for event in pygame.event.get():
             if event.type == QUIT:
                 run = False
@@ -52,6 +56,20 @@ else:
                     for i in range(len(deal_rects)):
                         if deal_rects[i].collidepoint(pos):
                             e.claim_domino(e.get_current_player().get_name(), i)
+                elif e.get_phase() == PLACE:
+                    for i in range(len(board_rects)):
+                        if board_rects[i].collidepoint(pos):
+                            mouse_x, mouse_y = pos
+                            offset_x, offset_y = BOARD_OFFSET[i]
+                            row = (mouse_y - offset_y) // TILE_SIZE
+                            col = (mouse_x - offset_x) // TILE_SIZE
+                            if place_queue[i] is None:
+                                place_queue[i] = (row, col)
+                            else:
+                                e.place_domino(e.get_players()[i], place_queue[i], (row, col))
+                                place_queue[i] = None
+
+
 
         pygame.display.flip()
         clock.tick(fps)
