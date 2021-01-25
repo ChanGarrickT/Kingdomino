@@ -1,6 +1,7 @@
-from Assets import Board, Player
+from Assets import Player
 import json
 import random
+import copy
 
 CLAIM = 0
 PLACE = 1
@@ -21,6 +22,7 @@ class Engine:
                 self._valid_setup = True
                 self._game_over = False
                 self._players = {}
+                # Populate a dictionary of Players with names as keys
                 player_id = 0
                 for p in players:
                     self._players[p] = Player(p, player_id)
@@ -34,6 +36,7 @@ class Engine:
                     random.shuffle(self._turn_order)
                 self._turn = 0
                 self._next_order = [None for i in range(len(players))]
+                # Load domino data from a JSON file
                 try:
                     with open('dominoes.json', 'r') as in_file:
                         data = json.load(in_file)
@@ -47,6 +50,9 @@ class Engine:
                 print(self.get_turn().get_name() + '\'s turn to pick')
                 self._deal = []
                 self.deal_dominoes()
+                self._history = []
+                self._history.append(GameState(self._players, self._turn, self._turn_order,
+                                               self._next_order, self._phase, self._deck, self._deal))
                 self.print_deal()
             else:
                 print('Invalid number of players')
@@ -97,9 +103,12 @@ class Engine:
                     print('\nMoving to Claim phase')
                 else:
                     print('\nGame Over')
+                    self._game_over = True
                     for p in self._players:
                         player = self._players[p]
                         print(player.get_name() + ': ' + str(score_board(player.get_board())) + ' points')
+        self._history.append(GameState(self._players, self._turn, self._turn_order,
+                                       self._next_order, self._phase, self._deck, self._deal))
         if self._phase == CLAIM:
             self.print_deal()
             print(self.get_turn().get_name() + '\'s turn to pick')
@@ -216,6 +225,9 @@ class Engine:
         if self._phase != CLAIM:
             print('Not currently claim phase')
             return
+        if self._game_over:
+            print('Game Over')
+            return
         try:
             player = self._players[name]
             if self._turn_order[self._turn] is not player:
@@ -249,6 +261,9 @@ class Engine:
         if not validate_coord(coord1, coord2):
             print('Invalid coordinates')
             return
+        if self._game_over:
+            print('Game Over')
+            return
         try:
             player = self._players[name]
             if player.get_dom_on_hold() is None:
@@ -276,6 +291,9 @@ class Engine:
             print(name + ' placed ' + str(player.get_dom_on_hold()[0]) + ' at ' + str(coord1) +
                             ' and ' + str(player.get_dom_on_hold()[1]) + ' at ' + str(coord2))
             player.set_dom_on_hold(None)
+            result = score_board(player.get_board())
+            player.set_score(result[0])
+            player.set_crowns(result[1])
             self.set_turn()
         except KeyError:
             print("Name not found")
@@ -287,17 +305,72 @@ class Engine:
         if self._phase != PLACE:
             print('Not currently Placement phase')
             return
+        if self._game_over:
+            print('Game Over')
+            return
         try:
             player = self._players[name]
-            player.set_dom_on_hold(None)
-            print(name + ' discarded their domino')
-            self._turn += 1
-            if self._turn >= len(self._players):
-                self._turn = 0
-                self._phase = CLAIM
-                print('Moving to Claim phase')
+            if player.get_dom_on_hold() is not None:
+                player.set_dom_on_hold(None)
+                print(name + ' discarded their domino')
+                self.set_turn()
+            else:
+                print(name + ' has no domino on hold')
         except KeyError:
             print('Name not found')
+
+    def undo(self):
+        """Undo an action. Undone actions cannot be redone."""
+        if not self._valid_setup:
+            print('Invalid game setup')
+            return
+        if len(self._history) <= 1:
+            print('No more to undo')
+            return
+        if self._game_over:
+            print('Game Over')
+            return
+        self._history.pop()
+        game_state = self._history[-1].get_game_state()
+        self._players = game_state[0]
+        self._turn = game_state[1]
+        self._turn_order = [self.get_player(i) for i in game_state[2]]
+        # GameState stores next_order as a list of names (strings)
+        # Here, we convert names into Player instances
+        for i in range(len(game_state[3])):
+            if game_state[3][i] is not None:
+                self._next_order[i] = self.get_player(game_state[3][i])
+            else:
+                self._next_order[i] = None
+        self._phase = game_state[4]
+        self._deck = game_state[5]
+        self._deal = game_state[6]
+        print('Undo successful')
+
+
+class GameState:
+    def __init__(self, players, turn, turn_order, next_order, phase, deck, deal):
+        """Initializes the game state"""
+        player_dict = {}
+        for p in players:
+            player_dict[p] = copy.deepcopy(players[p])
+        next_list = []
+        for i in next_order:
+            if i is not None:
+                next_list.append(i.get_name())
+            else:
+                next_list.append(None)
+        self._state = (player_dict,
+                       turn,
+                       [turn_order[i].get_name() for i in range(len(players))],
+                       next_list,
+                       phase,
+                       copy.copy(deck),
+                       copy.copy(deal))
+
+    def get_game_state(self):
+        """Returns the game state"""
+        return self._state
 
 
 def validate_coord(coord1, coord2):
@@ -376,7 +449,7 @@ def score_board(board):
     """
     Calculates and returns the score of the given board
     :param board: the board with which to calculate the score
-    :return: the score
+    :return: a tuple (score, number of crowns)
     """
     # Store all tiles to check in set
     unexplored = set()
@@ -386,6 +459,7 @@ def score_board(board):
             unexplored.add((i + board.get_topmost(), j + board.get_leftmost()))
 
     score = 0
+    total_crowns = 0
     # While there are unexplored coordinates, find contiguous sections of terrain
     # Score per section is the product of its size and number of crowns
     while len(unexplored) > 0:
@@ -396,7 +470,8 @@ def score_board(board):
         for tile in section:
             crowns += board.get_coord(tile[0], tile[1])[1]
         score += (len(section) * crowns)
-    return score
+        total_crowns += crowns
+    return (score, total_crowns)
 
 
 def _find_contiguous(board, coord, unexplored):

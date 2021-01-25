@@ -5,13 +5,22 @@ from Assets import Board
 
 TILE_SIZE = 50
 CROWN_SIZE = 15
-BOARD_OFFSET = [(60, 60), (1410, 60), (60, 570), (1410, 570)]
-DEAL_OFFSET = (785, 190)
+BOARD_OFFSET = [(60, 40), (1410, 40), (60, 560), (1410, 560)]
+DEAL_OFFSET = (785, 275)
+INFO_OFFSET = []
 TERRAINS = {'W': 'wheat.png', 'F': 'forest.png', 'O': 'ocean.png', 'G': 'grass.png', 'S': 'swamp.png', 'M': 'mine.png'}
 CASTLES = ['castle_blue.png', 'castle_pink.png', 'castle_yellow.png', 'castle_green.png']
 
 
 def draw_board(surface, board, player_number):
+    """
+    Draws a player's board
+    :param surface: the Surface on which to draw
+    :param board: the Board object to draw
+    :param player_number: the index of the player in the player list (used for castle color)
+    """
+    grid_img = pygame.image.load('images/grid.png')
+    surface.blit(grid_img, (0, 0))
     for row in range(len(board.get_grid())):
         for col in range(len(board.get_grid()[0])):
             x = col * TILE_SIZE
@@ -22,6 +31,11 @@ def draw_board(surface, board, player_number):
 
 
 def draw_domino(surface, domino):
+    """
+    Draw a domino
+    :param surface: the Surface on which to draw
+    :param domino: a tuple of tuples, representing the domino's terrain and crowns
+    """
     draw_tile(surface, domino[0], 0, 0, 100)
     draw_tile(surface, domino[1], 100, 0, 100)
 
@@ -50,7 +64,3 @@ def draw_tile(surface, tile, x, y, size=TILE_SIZE, castle_color=None):
 
     tile_img = pygame.transform.scale(tile_img, (size, size))
     surface.blit(tile_img, (x, y))
-
-
-def draw_claims(surface, claims):
-    pass

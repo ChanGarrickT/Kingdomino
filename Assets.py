@@ -175,6 +175,8 @@ class Player:
         self._name = name
         self._dom_on_hold = None
         self._board = Board()
+        self._score = 0
+        self._crowns = 0
         self._player_id = player_id
 
     def get_name(self):
@@ -195,6 +197,28 @@ class Player:
     def get_board(self):
         """Returns this player's Board"""
         return self._board
+
+    def get_score(self):
+        """Returns this player's score"""
+        return self._score
+
+    def set_score(self, score):
+        """
+        Set this player's score
+        :param score: the score
+        """
+        self._score = score
+
+    def get_crowns(self):
+        """Returns the number of crowns on this player's board"""
+        return self._crowns
+
+    def set_crowns(self, crowns):
+        """
+        Set the number of crowns this player has
+        :param crowns: the number of crowns
+        """
+        self._crowns = crowns
 
     def get_player_id(self):
         """Returns the player id"""
