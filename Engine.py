@@ -46,14 +46,14 @@ class Engine:
                     self._deck = self._deck[:12*len(self._players)]
                 except FileNotFoundError:
                     print('Domino data not found')
-                print('Game successfully initiated\n')
-                print(self.get_turn().get_name() + '\'s turn to pick')
+                # print('Game successfully initiated\n')
+                # print(self.get_turn().get_name() + '\'s turn to pick')
                 self._deal = []
                 self.deal_dominoes()
                 self._history = []
                 self._history.append(GameState(self._players, self._turn, self._turn_order,
                                                self._next_order, self._phase, self._deck, self._deal))
-                self.print_deal()
+                # self.print_deal()
             else:
                 print('Invalid number of players')
         else:
@@ -86,7 +86,7 @@ class Engine:
                 if self._next_order[i] is None:
                     empty = i
             self.claim_domino(self._turn_order[self._turn].get_name(), empty)
-            self.print_deal()
+            # self.print_deal()
             return
         # Increment the turn and/or change phases
         if self._turn == len(self._players):
@@ -94,13 +94,13 @@ class Engine:
             if self._phase == CLAIM:
                 self._phase = PLACE
                 self._turn_order = self._next_order
-                print('\nMoving to Placement phase')
+                # print('\nMoving to Placement phase')
             else:
                 if len(self._deck) > 0:
                     self.deal_dominoes()
                     self._phase = CLAIM
                     self._next_order = [None for i in range(len(self._players))]
-                    print('\nMoving to Claim phase')
+                    # print('\nMoving to Claim phase')
                 else:
                     print('\nGame Over')
                     self._game_over = True
@@ -109,9 +109,9 @@ class Engine:
                         print(player.get_name() + ': ' + str(score_board(player.get_board())) + ' points')
         self._history.append(GameState(self._players, self._turn, self._turn_order,
                                        self._next_order, self._phase, self._deck, self._deal))
-        if self._phase == CLAIM:
-            self.print_deal()
-            print(self.get_turn().get_name() + '\'s turn to pick')
+        # if self._phase == CLAIM:
+            # self.print_deal()
+            # print(self.get_turn().get_name() + '\'s turn to pick')
 
     def get_player(self, name):
         """
@@ -332,7 +332,7 @@ class Engine:
             return
         self._history.pop()
         game_state = self._history[-1].get_game_state()
-        self._players = game_state[0]
+        self._players = copy.deepcopy(game_state[0])
         self._turn = game_state[1]
         self._turn_order = [self.get_player(i) for i in game_state[2]]
         # GameState stores next_order as a list of names (strings)
@@ -345,28 +345,39 @@ class Engine:
         self._phase = game_state[4]
         self._deck = game_state[5]
         self._deal = game_state[6]
-        print('Undo successful')
+        print('\n---Returning to state:---')
+        print('Turn: ' + str(self._turn))
+        print(game_state[2])
+        print(game_state[3])
+        print('Phase: ' + str(self._phase))
+        print('---Undo successful---')
 
 
 class GameState:
     def __init__(self, players, turn, turn_order, next_order, phase, deck, deal):
         """Initializes the game state"""
-        player_dict = {}
-        for p in players:
-            player_dict[p] = copy.deepcopy(players[p])
+        # player_dict = {}
+        # for p in players:
+        #     player_dict[p] = copy.deepcopy(players[p])
         next_list = []
         for i in next_order:
             if i is not None:
                 next_list.append(i.get_name())
             else:
                 next_list.append(None)
-        self._state = (player_dict,
+        self._state = (copy.deepcopy(players),
                        turn,
                        [turn_order[i].get_name() for i in range(len(players))],
                        next_list,
                        phase,
                        copy.copy(deck),
                        copy.copy(deal))
+        print('\n---GameState created---')
+        print('Turn: ' + str(turn))
+        print(self._state[2])
+        print(next_list)
+        print('Phase: ' + str(phase))
+        print('---GameState creation finish---')
 
     def get_game_state(self):
         """Returns the game state"""
